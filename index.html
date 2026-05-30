@@ -10,7 +10,7 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            user-select: none; /* жестоко, но в духе фильма */
+            user-select: none;
         }
 
         body {
@@ -35,7 +35,7 @@
             z-index: 0;
         }
 
-        /* Атмосферный VHS шум (анимированный) */
+        /* Атмосферный VHS шум */
         .noise-overlay {
             position: fixed;
             top: 0;
@@ -49,6 +49,80 @@
             mix-blend-mode: overlay;
         }
 
+        /* ========== СИЛЬНЫЙ ЭФФЕКТ ТРЯСКИ + РАЗМЫВ ========== */
+        @keyframes violentShake {
+            0% { transform: translate(0px, 0px) rotate(0deg); }
+            10% { transform: translate(-4px, 2px) rotate(-0.5deg); }
+            20% { transform: translate(5px, -3px) rotate(0.7deg); }
+            30% { transform: translate(-3px, 4px) rotate(-0.3deg); }
+            40% { transform: translate(6px, -2px) rotate(0.6deg); }
+            50% { transform: translate(-5px, 1px) rotate(-0.8deg); }
+            60% { transform: translate(4px, 3px) rotate(0.4deg); }
+            70% { transform: translate(-6px, -2px) rotate(-0.6deg); }
+            80% { transform: translate(3px, -4px) rotate(0.5deg); }
+            90% { transform: translate(-2px, 2px) rotate(-0.2deg); }
+            100% { transform: translate(0px, 0px) rotate(0deg); }
+        }
+
+        @keyframes blurPulse {
+            0% { filter: blur(0px); }
+            25% { filter: blur(3px); }
+            50% { filter: blur(1.5px); }
+            75% { filter: blur(4px); }
+            100% { filter: blur(0px); }
+        }
+
+        /* RGB-смещение для усиления эффекта */
+        @keyframes rgbSplit {
+            0% { text-shadow: -2px 0 rgba(255,0,0,0.3), 2px 0 rgba(0,0,255,0.3); }
+            25% { text-shadow: -4px 0 rgba(255,0,0,0.5), 4px 0 rgba(0,255,0,0.3); }
+            50% { text-shadow: -2px 0 rgba(0,255,0,0.3), 2px 0 rgba(255,0,0,0.4); }
+            75% { text-shadow: -5px 0 rgba(255,0,0,0.4), 5px 0 rgba(0,0,255,0.5); }
+            100% { text-shadow: -2px 0 rgba(255,0,0,0.3), 2px 0 rgba(0,0,255,0.3); }
+        }
+
+        /* Класс для сильной тряски + размыва */
+        body.chemical-glitch {
+            animation: violentShake 0.08s infinite ease-in-out;
+        }
+
+        body.chemical-glitch .site-container {
+            animation: blurPulse 0.12s infinite;
+        }
+
+        body.chemical-glitch h1,
+        body.chemical-glitch .card,
+        body.chemical-glitch .rule-link,
+        body.chemical-glitch .break-btn {
+            animation: rgbSplit 0.1s infinite;
+        }
+
+        /* Дополнительный слой с глитч-эффектом */
+        body.chemical-glitch::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(255,0,0,0.08) 0px,
+                rgba(0,255,0,0.08) 2px,
+                rgba(0,0,255,0.08) 4px,
+                transparent 6px
+            );
+            pointer-events: none;
+            z-index: 9998;
+            animation: rgbShift 0.08s infinite;
+        }
+
+        @keyframes rgbShift {
+            0% { opacity: 0.2; mix-blend-mode: screen; }
+            50% { opacity: 0.5; mix-blend-mode: overlay; }
+            100% { opacity: 0.2; mix-blend-mode: screen; }
+        }
+
         /* ====== ОСНОВНОЙ КОНТЕЙНЕР ====== */
         .site-container {
             position: relative;
@@ -56,20 +130,7 @@
             max-width: 1280px;
             margin: 0 auto;
             padding: 2rem 1.5rem 4rem;
-            transition: all 0.2s cubic-bezier(0.2, 0.9, 0.6, 1.1);
-        }
-
-        /* Глючный режим "химическое стекание" */
-        body.chemical-glitch .site-container {
-            transform: skewX(0.5deg) translateY(-2px);
-            filter: blur(0.4px) contrast(140%);
-        }
-        body.chemical-glitch .glitch-target {
-            animation: textGlitch 0.12s infinite;
-        }
-        @keyframes textGlitch {
-            0% { transform: translate(1px, -1px); opacity: 0.9; }
-            100% { transform: translate(-1px, 1px); opacity: 1; }
+            transition: all 0.2s;
         }
 
         /* ========== ПРАВИЛА НАВИГАЦИИ ========== */
@@ -97,7 +158,7 @@
             transform: translateX(4px);
         }
 
-        /* ========== ГЛАВНЫЙ ПРИВЕТСТВЕННЫЙ МОДАЛ (ПРАВИЛА ВХОДА) ========== */
+        /* ========== МОДАЛ ========== */
         .welcome-modal {
             position: fixed;
             top: 0;
@@ -111,13 +172,12 @@
             align-items: center;
             justify-content: center;
             font-family: monospace;
-            transition: opacity 0.3s;
         }
         .modal-box {
             max-width: 520px;
             background: #111;
             border: 1px solid #444;
-            padding: 2rem 2rem 2rem 2rem;
+            padding: 2rem;
             box-shadow: 0 0 35px rgba(0,0,0,0.8);
             text-align: center;
         }
@@ -158,7 +218,6 @@
             font-size: 3rem;
             font-weight: normal;
             letter-spacing: -2px;
-            margin-top: 0;
             text-transform: uppercase;
             color: #ececec;
             border-right: 2px solid #6f4f1f;
@@ -171,10 +230,6 @@
             color: #6e6e6e;
             border-left: 1px solid #3c3c3c;
             padding-left: 10px;
-        }
-        hr {
-            border-color: #2a2a2a;
-            margin: 20px 0;
         }
 
         /* Панель разрушитель */
@@ -308,7 +363,7 @@
             cursor: pointer;
         }
 
-        /* таймер бездействия (секрет) */
+        /* таймер бездействия */
         .idle-trigger-message {
             position: fixed;
             bottom: 20px;
@@ -349,7 +404,7 @@
 <div class="noise-overlay"></div>
 <div class="hidden-penguin" id="penguinFlash">🐧💥</div>
 
-<!-- Модальное окно входа (Правила клуба) -->
+<!-- Модальное окно входа -->
 <div id="entryModal" class="welcome-modal">
     <div class="modal-box">
         <p style="font-size:1.3rem;">⛓️ ПРАВИЛО №0 ⛓️</p>
@@ -372,8 +427,9 @@
             <div class="tagline">«You are not your job. You are not your bank account.»</div>
         </div>
         <div style="margin-top: 10px;">
-            <span id="glitchSliderTip" style="font-size: 12px;">⚗️ Хим. стекание</span>
-            <input type="range" id="glitchSlider" min="0" max="1" step="1" value="0" style="width: 100px; background:#222;">
+            <span style="font-size: 12px;">⚗️ ХИМИЧЕСКОЕ СТЕКАНИЕ</span><br>
+            <button id="enableChemicalBtn" class="destroy-btn" style="padding:4px 12px; margin-top:5px;">АКТИВИРОВАТЬ</button>
+            <button id="disableChemicalBtn" class="coward-btn" style="padding:4px 12px; margin-top:5px;">ВЫКЛЮЧИТЬ</button>
         </div>
     </div>
     <!-- Навигация - правила -->
@@ -471,12 +527,22 @@
     const modal = document.getElementById('entryModal');
     const acceptBtn = document.getElementById('acceptChaosBtn');
     const rejectBtn = document.getElementById('rejectBtn');
-    const mainCont = document.getElementById('mainContainer');
-    const glitchSlider = document.getElementById('glitchSlider');
     const mayhemBtn = document.getElementById('mayhemBtn');
     let breakCount = 0;
     const breakCounterSpan = document.getElementById('breakCounter');
-    let chemicalActive = false;
+
+    // УПРАВЛЕНИЕ ЭФФЕКТАМИ
+    const enableChemicalBtn = document.getElementById('enableChemicalBtn');
+    const disableChemicalBtn = document.getElementById('disableChemicalBtn');
+    const body = document.body;
+
+    enableChemicalBtn.addEventListener('click', () => {
+        body.classList.add('chemical-glitch');
+    });
+
+    disableChemicalBtn.addEventListener('click', () => {
+        body.classList.remove('chemical-glitch');
+    });
 
     // Принять условия
     acceptBtn.onclick = () => {
@@ -486,38 +552,24 @@
     rejectBtn.onclick = () => {
         window.location.href = 'https://www.imdb.com/title/tt0137523/';
     };
-    // если уже принял гипотетически, но для простоты всегда показываем модалку при загрузке, но можно запомнить.
     if(localStorage.getItem('fightClubAccepted') === 'true') {
         modal.style.display = 'none';
     }
 
-    // ГЛЮЧ-СЛАЙДЕР (химическое стекание)
-    glitchSlider.addEventListener('input', (e) => {
-        if(e.target.value == 1) {
-            document.body.classList.add('chemical-glitch');
-            chemicalActive = true;
-        } else {
-            document.body.classList.remove('chemical-glitch');
-            chemicalActive = false;
-        }
-    });
-
-    // РАЗРУШИТЕЛЬ: ломаем интерфейс
+    // РАЗРУШИТЕЛЬ
     mayhemBtn.addEventListener('click', () => {
         breakCount++;
         breakCounterSpan.innerText = `Нанесено урона дизайну: ${breakCount} раз`;
-        // эффект разрушения: смещаем все кнопки и текст
         const allBtns = document.querySelectorAll('button, .rule-link, .destroy-btn');
         allBtns.forEach(btn => {
-            if(!btn.style.transform) btn.style.transform = `rotate(${Math.random() * 2 - 1}deg) translateX(${Math.random() * 4 - 2}px)`;
-            else btn.style.transform = `rotate(${Math.random() * 6 - 3}deg) translateX(${Math.random() * 8 - 4}px)`;
+            btn.style.transform = `rotate(${Math.random() * 6 - 3}deg) translateX(${Math.random() * 8 - 4}px)`;
+            setTimeout(() => { btn.style.transform = ''; }, 300);
         });
         const randomColor = `hsl(${Math.random() * 60 + 20}, 40%, 30%)`;
         document.body.style.backgroundColor = randomColor;
         setTimeout(() => { document.body.style.backgroundColor = ''; }, 400);
         const cards = document.querySelectorAll('.card');
         cards.forEach(c => { c.style.borderLeftColor = `#${Math.floor(Math.random()*16777215).toString(16)}`; });
-        // добавить счётчик в консольный стиль
         console.log(`%cУрон хаосу: ${breakCount}`, 'color: orange; font-size: 16px');
     });
 
@@ -554,11 +606,10 @@
         document.getElementById('soapResult').innerHTML = `🧼 Выход мыла: ${soapBars} кусков`;
     });
 
-    // Шумная галерея - дергание картинок (jitter)
-    const galleryDiv = document.getElementById('jitterGallery');
-    if(galleryDiv){
+    // Шумная галерея
+    if(document.getElementById('jitterGallery')){
         setInterval(() => {
-            if(galleryDiv && document.getElementById('fightGallery').style.display !== 'none'){
+            if(document.getElementById('fightGallery').style.display !== 'none'){
                 const items = document.querySelectorAll('.grain-card');
                 items.forEach(item => {
                     const x = (Math.random() - 0.5) * 8;
@@ -569,7 +620,7 @@
         }, 150);
     }
 
-    // ФОРУМНЫЙ БОЙ (без регистрации)
+    // ФОРУМ
     const chatContainer = document.getElementById('chatMessages');
     const chatInput = document.getElementById('chatInput');
     const sendBtn = document.getElementById('sendMsgBtn');
@@ -593,7 +644,7 @@
         }, 300);
     });
 
-    // ПАСХАЛКА 3 клика по футеру (пингвин на 0.3 сек)
+    // ПАСХАЛКА 3 клика
     let clickCount = 0;
     const easterZone = document.getElementById('easterEggTrigger');
     let timeoutReset;
@@ -604,13 +655,12 @@
         if(clickCount === 3) {
             const penguin = document.getElementById('penguinFlash');
             penguin.style.opacity = '1';
-            penguin.style.transition = 'none';
             setTimeout(() => { penguin.style.opacity = '0'; }, 300);
             clickCount = 0;
         }
     });
 
-    // Бездействие 10 секунд (idle) — появляется сообщение
+    // Бездействие
     let idleTimer;
     const idleMsgDiv = document.getElementById('idleMessage');
     function resetIdleTimer(){
@@ -631,10 +681,8 @@
         alert("Свобода — это когда тебе нечего терять. Закрой вкладку, если посмеешь.");
     });
 
-    // дополнительный визуальный шум: при разрушителе дёргание body
-    // также для "режима химия" small tweak, который уже есть
-    // кадр-флешбек - генератор случайных эффектов
     console.log("%cПомни: первый закон — не рассказывать.", "color:#ab7b3c");
+    console.log("%cАктивируй ХИМИЧЕСКОЕ СТЕКАНИЕ — почувствуешь настоящую тряску!", "color:#e09d5e; font-size:12px");
 </script>
 </body>
-</html>
+    </html>
