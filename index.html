@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>PROJECT MAYHEM // Бойцовский клуб</title>
+    <style>
+        /* ========== RESET & БЕТОН ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none; /* жестоко, но в духе фильма */
+        }
+
+        body {
+            background: #0a0a0a;
+            font-family: 'Courier New', 'Courier', monospace;
+            color: #c0c0c0;
+            line-height: 1.4;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Бетонная текстура */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" opacity="0.08"><path fill="none" d="M0 0 L400 0 M0 10 L400 10 M0 20 L400 20" stroke="%23aaaaaa" stroke-width="0.3"/><circle cx="30" cy="40" r="1.5" fill="%23ffffff"/><circle cx="280" cy="110" r="2" fill="%23cccccc"/><circle cx="150" cy="220" r="1.2" fill="%23aaaaaa"/><path d="M50 150 L80 153 L70 160 Z" fill="%23999999"/></svg>');
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Атмосферный VHS шум (анимированный) */
+        .noise-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-radial-gradient(circle at 20% 30%, rgba(0,0,0,0.05), #000 0.5px);
+            pointer-events: none;
+            z-index: 2;
+            opacity: 0.3;
+            mix-blend-mode: overlay;
+        }
+
+        /* ====== ОСНОВНОЙ КОНТЕЙНЕР ====== */
+        .site-container {
+            position: relative;
+            z-index: 3;
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem 4rem;
+            transition: all 0.2s cubic-bezier(0.2, 0.9, 0.6, 1.1);
+        }
+
+        /* Глючный режим "химическое стекание" */
+        body.chemical-glitch .site-container {
+            transform: skewX(0.5deg) translateY(-2px);
+            filter: blur(0.4px) contrast(140%);
+        }
+        body.chemical-glitch .glitch-target {
+            animation: textGlitch 0.12s infinite;
+        }
+        @keyframes textGlitch {
+            0% { transform: translate(1px, -1px); opacity: 0.9; }
+            100% { transform: translate(-1px, 1px); opacity: 1; }
+        }
+
+        /* ========== ПРАВИЛА НАВИГАЦИИ ========== */
+        .nav-rules {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.2rem;
+            margin-bottom: 3rem;
+            border-bottom: 1px dashed #4a4a4a;
+            padding-bottom: 1.2rem;
+        }
+        .rule-link {
+            text-decoration: none;
+            color: #bababa;
+            font-weight: bold;
+            font-size: 1rem;
+            letter-spacing: 1px;
+            transition: 0.2s;
+            border-left: 2px solid #5c5c5c;
+            padding-left: 8px;
+        }
+        .rule-link:hover {
+            color: #e3b87c;
+            border-left-color: #e3b87c;
+            transform: translateX(4px);
+        }
+
+        /* ========== ГЛАВНЫЙ ПРИВЕТСТВЕННЫЙ МОДАЛ (ПРАВИЛА ВХОДА) ========== */
+        .welcome-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(5,5,5,0.96);
+            backdrop-filter: blur(2px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: monospace;
+            transition: opacity 0.3s;
+        }
+        .modal-box {
+            max-width: 520px;
+            background: #111;
+            border: 1px solid #444;
+            padding: 2rem 2rem 2rem 2rem;
+            box-shadow: 0 0 35px rgba(0,0,0,0.8);
+            text-align: center;
+        }
+        .modal-box p {
+            margin: 1.2rem 0;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+        .modal-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 1.8rem;
+        }
+        .destroy-btn, .coward-btn {
+            background: none;
+            border: 1px solid #6e6e6e;
+            padding: 8px 20px;
+            font-family: monospace;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #ddd;
+        }
+        .destroy-btn:hover {
+            background: #8b5a2b;
+            border-color: #c97e3a;
+            color: black;
+            box-shadow: 0 0 6px #ffa500;
+        }
+        .coward-btn:hover {
+            background: #2c2c2c;
+            color: #777;
+        }
+
+        /* заголовок */
+        h1 {
+            font-size: 3rem;
+            font-weight: normal;
+            letter-spacing: -2px;
+            margin-top: 0;
+            text-transform: uppercase;
+            color: #ececec;
+            border-right: 2px solid #6f4f1f;
+            display: inline-block;
+            padding-right: 1rem;
+        }
+        .tagline {
+            font-size: 0.75rem;
+            margin-top: 0.5rem;
+            color: #6e6e6e;
+            border-left: 1px solid #3c3c3c;
+            padding-left: 10px;
+        }
+        hr {
+            border-color: #2a2a2a;
+            margin: 20px 0;
+        }
+
+        /* Панель разрушитель */
+        .mayhem-panel {
+            background: #0f0f0f;
+            border-top: 1px solid #323232;
+            border-bottom: 1px solid #323232;
+            padding: 1rem;
+            margin: 2rem 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .break-btn {
+            background: none;
+            border: 1px solid #984b1f;
+            padding: 8px 20px;
+            font-family: monospace;
+            font-weight: bold;
+            cursor: crosshair;
+            color: #e09d5e;
+        }
+        .break-counter {
+            font-size: 0.8rem;
+            color: #999;
+        }
+
+        /* Сетка контента */
+        .fight-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        @media (max-width: 780px) {
+            .fight-grid { grid-template-columns: 1fr; }
+            .site-container { padding: 1rem; }
+            h1 { font-size: 2rem; }
+        }
+        .card {
+            background: #0c0c0c;
+            border-left: 5px solid #2b2b2b;
+            padding: 1.2rem;
+            transition: 0.2s;
+        }
+        .card h3 {
+            color: #cb9e6b;
+            margin-bottom: 10px;
+        }
+        .card p { font-size: 0.9rem; margin-top: 8px; }
+
+        /* Калькулятор мыла */
+        .soap-calc {
+            background: #080808;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        .soap-calc input {
+            background: #1e1e1e;
+            border: 1px solid #5a5a5a;
+            padding: 8px;
+            font-family: monospace;
+            color: #f0bc84;
+            width: 140px;
+        }
+        .soap-result {
+            margin-top: 12px;
+            font-weight: bold;
+        }
+
+        /* галерея шумная */
+        .noise-gallery {
+            display: flex;
+            gap: 1rem;
+            overflow-x: auto;
+            padding: 1rem 0;
+            cursor: grab;
+        }
+        .grain-card {
+            min-width: 150px;
+            background: #151515;
+            height: 110px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            filter: contrast(140%) brightness(70%) blur(0.6px);
+            transition: 0.1s;
+            border: 1px solid #3a3a3a;
+            font-size: 0.7rem;
+            text-align: center;
+            flex-direction: column;
+        }
+        .grain-card:hover {
+            filter: none;
+            background: #2d2d2d;
+        }
+
+        /* Форумная секция */
+        .fight-chat {
+            background: #060606;
+            border: 1px dashed #545454;
+            padding: 1.2rem;
+        }
+        .message-area {
+            height: 140px;
+            overflow-y: auto;
+            font-size: 0.8rem;
+            margin-bottom: 10px;
+            background: #0000004d;
+            padding: 6px;
+        }
+        .chat-input {
+            display: flex;
+            gap: 8px;
+        }
+        .chat-input input {
+            flex: 1;
+            background: #1c1c1c;
+            border: none;
+            padding: 8px;
+            color: #dfb27c;
+            font-family: monospace;
+        }
+        .chat-input button {
+            background: #2c2c2c;
+            border: none;
+            color: #c0c0c0;
+            padding: 0 15px;
+            cursor: pointer;
+        }
+
+        /* таймер бездействия (секрет) */
+        .idle-trigger-message {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #000000cc;
+            border-left: 3px solid #b35f1a;
+            padding: 8px 15px;
+            font-size: 0.7rem;
+            z-index: 99;
+            display: none;
+            backdrop-filter: blur(10px);
+        }
+
+        footer {
+            margin-top: 3rem;
+            text-align: center;
+            font-size: 0.65rem;
+            border-top: 1px solid #2a2a2a;
+            padding-top: 1.5rem;
+            color: #5c5c5c;
+        }
+        .hidden-penguin {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            font-size: 60px;
+            opacity: 0;
+            pointer-events: none;
+            transition: 0s;
+            z-index: 9999;
+        }
+        button, .rule-link, .destroy-btn, .coward-btn, .break-btn {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<div class="noise-overlay"></div>
+<div class="hidden-penguin" id="penguinFlash">🐧💥</div>
+
+<!-- Модальное окно входа (Правила клуба) -->
+<div id="entryModal" class="welcome-modal">
+    <div class="modal-box">
+        <p style="font-size:1.3rem;">⛓️ ПРАВИЛО №0 ⛓️</p>
+        <p>ПРЕЖДЕ ЧЕМ ПРОДОЛЖИТЬ:<br>
+        ВЫ НЕ ПРОКРУЧИВАЕТЕ РЕКЛАМУ.<br>
+        ВЫ НЕ СТАВИТЕ ЛАЙКИ.<br>
+        ВАШИ ДАННЫЕ НАС НЕ ИНТЕРЕСУЮТ.<br>
+        <strong>ПРИНИМАЕТЕ УСЛОВИЯ ХАОСА?</strong></p>
+        <div class="modal-buttons">
+            <button id="acceptChaosBtn" class="destroy-btn">✖ СТЕРЕТЬ ИСТОРИЮ ✖</button>
+            <button id="rejectBtn" class="coward-btn">Я СЛАБАК (УЙТИ)</button>
+        </div>
+    </div>
+</div>
+
+<div class="site-container" id="mainContainer">
+    <div style="display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap;">
+        <div>
+            <h1>PROJECT MAYHEM</h1>
+            <div class="tagline">«You are not your job. You are not your bank account.»</div>
+        </div>
+        <div style="margin-top: 10px;">
+            <span id="glitchSliderTip" style="font-size: 12px;">⚗️ Хим. стекание</span>
+            <input type="range" id="glitchSlider" min="0" max="1" step="1" value="0" style="width: 100px; background:#222;">
+        </div>
+    </div>
+    <!-- Навигация - правила -->
+    <div class="nav-rules">
+        <a href="#" class="rule-link" data-section="rules12">📜 ПРАВИЛО №1&2</a>
+        <a href="#" class="rule-link" data-section="fightGallery">🥊 ПРАВИЛО №3: ДРАКА</a>
+        <a href="#" class="rule-link" data-section="schedule">📅 ПРАВИЛО №4: ОДИН БОЙ ЗА РАЗ</a>
+        <a href="#" class="rule-link" data-section="merch">🧼 ПРАВИЛО №5: БЕЗ ОБУВИ, МЫЛО</a>
+        <a href="#" class="rule-link" data-section="forum">⚔️ ПРАВИЛО №8: БЕЙСЯ НА ФОРУМЕ</a>
+    </div>
+
+    <!-- Панель Разрушитель -->
+    <div class="mayhem-panel">
+        <button id="mayhemBtn" class="break-btn">💥 РАЗРУШИТЕЛЬ 💥</button>
+        <span class="break-counter" id="breakCounter">Нанесено урона дизайну: 0 раз</span>
+    </div>
+
+    <!-- Секции контента -->
+    <div id="rules12" class="content-section">
+        <div class="card">
+            <h3>ПРАВИЛО №1: НЕ РАССКАЗЫВАТЬ О БОЙЦОВСКОМ КЛУБЕ</h3>
+            <p>ПРАВИЛО №2: НЕ РАССКАЗЫВАТЬ О БОЙЦОВСКОМ КЛУБЕ. Это место — твоя тень. Фильм Финчера 1999 года, роман Чака Паланика. Мы не рекламируем насилие, мы изучаем слом.</p>
+        </div>
+    </div>
+
+    <div id="fightGallery" class="content-section" style="display:none;">
+        <div class="card">
+            <h3>ГАЛЕРЕЯ «ВИЗУАЛЬНЫЙ ШУМ»</h3>
+            <p>Только режим бессонница: кадры хаотично дергаются, лови курсором</p>
+            <div class="noise-gallery" id="jitterGallery">
+                <div class="grain-card">🥊 УДАР №1</div>
+                <div class="grain-card">🧨 МЫЛОТЕКА</div>
+                <div class="grain-card">🚗 АВАРИЯ</div>
+                <div class="grain-card">👔 БОССА В МУКУ</div>
+                <div class="grain-card">🔥 ВЗРЫВ</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="schedule" class="content-section" style="display:none;">
+        <div class="card">
+            <h3>РАСПИСАНИЕ «ОДИН БОЙ ЗА РАЗ»</h3>
+            <p>🔹 Следующая битва с эго: каждую среду в подвале разума. <br>🔹 Онлайн-баттл: 22:00 GMT — напиши своему отражению. <br>🔹 Реальные встречи? Тайлер не одобряет цифры, но мы нарушим правило.</p>
+        </div>
+    </div>
+
+    <div id="merch" class="content-section" style="display:none;">
+        <div class="card">
+            <h3>МЫЛО "PAPER STREET"</h3>
+            <p>Сделано из лучших липо-отходов корпоративных бонусов.</p>
+            <div class="soap-calc">
+                <p><strong>🧼 КАЛЬКУЛЯТОР МЫЛА:</strong> Сколько кг твоего босса?</p>
+                <input type="number" id="fatInput" placeholder="Кг начальника" value="85">
+                <button id="calcSoapBtn" class="destroy-btn" style="padding:4px 12px;">СДЕЛАТЬ МЫЛО</button>
+                <div id="soapResult" class="soap-result">▶️ Результат: 34 куска мыла</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="forum" class="content-section" style="display:none;">
+        <div class="card fight-chat">
+            <h3>⚡ ТЫ ЗДЕСЬ ВПЕРВЫЕ? ТЫ ДОЛЖЕН БИТЬСЯ ⚡</h3>
+            <div class="message-area" id="chatMessages">
+                <div>🎙 [Система]: Помни, первый удар — за тобой.</div>
+                <div>🥊 Тайлер: Ты не уникален.</div>
+            </div>
+            <div class="chat-input">
+                <input type="text" id="chatInput" placeholder="Напиши удар...">
+                <button id="sendMsgBtn">БИТЬ</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="fight-grid">
+        <div class="card">
+            <h3>ТАЙЛЕР РЕКОМЕНДУЕТ</h3>
+            <p>🔪 Рецепт взрывчатки из удобрений? ШУТКА. (Но почитай Паланика)<br>
+            💣 Как подраться с самим собой: найди зеркало и скажи "я не моя работа".<br>
+            🗣 Курс «Чего ты хочешь на самом деле» — ответ: потерять всё.</p>
+        </div>
+        <div class="card">
+            <h3>ИНТЕРВЬЮ С РАЗРУШЕНИЕМ</h3>
+            <p>«Потеря надежды — это свобода». Если ты сломлен — ты здесь к месту. Нажми «Разрушитель» ещё раз.</p>
+        </div>
+    </div>
+    <footer>
+        <p>© PROJECT MAYHEM — ни один сервер не пострадал, но каждый может быть стерт. <span id="easterEggTrigger" style="cursor: crosshair;">[НАЖМИ 3 РАЗА ТУТ]</span></p>
+    </footer>
+</div>
+
+<div id="idleMessage" class="idle-trigger-message">«Я не здесь. Твоё посещение — побочный эффект скуки. Закрой вкладку. Сожги свой телефон.» <button id="idleYesBtn" style="background:black;border:1px solid red;color:red;margin-left:8px;">ДА, СЭР</button></div>
+
+<script>
+    // ДОМ элементы
+    const modal = document.getElementById('entryModal');
+    const acceptBtn = document.getElementById('acceptChaosBtn');
+    const rejectBtn = document.getElementById('rejectBtn');
+    const mainCont = document.getElementById('mainContainer');
+    const glitchSlider = document.getElementById('glitchSlider');
+    const mayhemBtn = document.getElementById('mayhemBtn');
+    let breakCount = 0;
+    const breakCounterSpan = document.getElementById('breakCounter');
+    let chemicalActive = false;
+
+    // Принять условия
+    acceptBtn.onclick = () => {
+        modal.style.display = 'none';
+        localStorage.setItem('fightClubAccepted', 'true');
+    };
+    rejectBtn.onclick = () => {
+        window.location.href = 'https://www.imdb.com/title/tt0137523/';
+    };
+    // если уже принял гипотетически, но для простоты всегда показываем модалку при загрузке, но можно запомнить.
+    if(localStorage.getItem('fightClubAccepted') === 'true') {
+        modal.style.display = 'none';
+    }
+
+    // ГЛЮЧ-СЛАЙДЕР (химическое стекание)
+    glitchSlider.addEventListener('input', (e) => {
+        if(e.target.value == 1) {
+            document.body.classList.add('chemical-glitch');
+            chemicalActive = true;
+        } else {
+            document.body.classList.remove('chemical-glitch');
+            chemicalActive = false;
+        }
+    });
+
+    // РАЗРУШИТЕЛЬ: ломаем интерфейс
+    mayhemBtn.addEventListener('click', () => {
+        breakCount++;
+        breakCounterSpan.innerText = `Нанесено урона дизайну: ${breakCount} раз`;
+        // эффект разрушения: смещаем все кнопки и текст
+        const allBtns = document.querySelectorAll('button, .rule-link, .destroy-btn');
+        allBtns.forEach(btn => {
+            if(!btn.style.transform) btn.style.transform = `rotate(${Math.random() * 2 - 1}deg) translateX(${Math.random() * 4 - 2}px)`;
+            else btn.style.transform = `rotate(${Math.random() * 6 - 3}deg) translateX(${Math.random() * 8 - 4}px)`;
+        });
+        const randomColor = `hsl(${Math.random() * 60 + 20}, 40%, 30%)`;
+        document.body.style.backgroundColor = randomColor;
+        setTimeout(() => { document.body.style.backgroundColor = ''; }, 400);
+        const cards = document.querySelectorAll('.card');
+        cards.forEach(c => { c.style.borderLeftColor = `#${Math.floor(Math.random()*16777215).toString(16)}`; });
+        // добавить счётчик в консольный стиль
+        console.log(`%cУрон хаосу: ${breakCount}`, 'color: orange; font-size: 16px');
+    });
+
+    // Навигация по правилам
+    const sections = ['rules12','fightGallery','schedule','merch','forum'];
+    function showSection(id) {
+        sections.forEach(sec => {
+            const el = document.getElementById(sec);
+            if(el) el.style.display = 'none';
+        });
+        const targetDiv = document.getElementById(id);
+        if(targetDiv) targetDiv.style.display = 'block';
+    }
+    document.querySelectorAll('.rule-link').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const sectionId = link.getAttribute('data-section');
+            if(sectionId) showSection(sectionId);
+        });
+    });
+    showSection('rules12');
+
+    // КАЛЬКУЛЯТОР МЫЛА
+    document.getElementById('calcSoapBtn')?.addEventListener('click', () => {
+        let fat = parseFloat(document.getElementById('fatInput').value);
+        if(isNaN(fat)) fat = 80;
+        const soapBars = Math.floor(fat * 0.4);
+        document.getElementById('soapResult').innerHTML = `🧼 Выход мыла: ${soapBars} кусков (липо-лизис завершён)`;
+    });
+    document.getElementById('fatInput')?.addEventListener('input', () => {
+        let fat = parseFloat(document.getElementById('fatInput').value);
+        if(isNaN(fat)) fat = 80;
+        const soapBars = Math.floor(fat * 0.4);
+        document.getElementById('soapResult').innerHTML = `🧼 Выход мыла: ${soapBars} кусков`;
+    });
+
+    // Шумная галерея - дергание картинок (jitter)
+    const galleryDiv = document.getElementById('jitterGallery');
+    if(galleryDiv){
+        setInterval(() => {
+            if(galleryDiv && document.getElementById('fightGallery').style.display !== 'none'){
+                const items = document.querySelectorAll('.grain-card');
+                items.forEach(item => {
+                    const x = (Math.random() - 0.5) * 8;
+                    const y = (Math.random() - 0.5) * 6;
+                    item.style.transform = `translate(${x}px, ${y}px)`;
+                });
+            }
+        }, 150);
+    }
+
+    // ФОРУМНЫЙ БОЙ (без регистрации)
+    const chatContainer = document.getElementById('chatMessages');
+    const chatInput = document.getElementById('chatInput');
+    const sendBtn = document.getElementById('sendMsgBtn');
+    function addMessage(author, text){
+        if(!chatContainer) return;
+        const msgDiv = document.createElement('div');
+        msgDiv.innerHTML = `<strong>${author}:</strong> ${text}`;
+        chatContainer.appendChild(msgDiv);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+        if(chatContainer.children.length > 15) chatContainer.removeChild(chatContainer.children[0]);
+    }
+    sendBtn?.addEventListener('click', () => {
+        let msg = chatInput.value.trim();
+        if(msg === "") return;
+        addMessage("Боец", msg);
+        chatInput.value = "";
+        setTimeout(() => {
+            const answers = ["Слабый удар!", "Ещё!", "Тайлер одобряет боль.", "Ты пропустил хук слева.", "Бей сильнее, принцесса"];
+            const randomAns = answers[Math.floor(Math.random() * answers.length)];
+            addMessage("СОПЕРНИК", randomAns);
+        }, 300);
+    });
+
+    // ПАСХАЛКА 3 клика по футеру (пингвин на 0.3 сек)
+    let clickCount = 0;
+    const easterZone = document.getElementById('easterEggTrigger');
+    let timeoutReset;
+    easterZone?.addEventListener('click', () => {
+        clickCount++;
+        clearTimeout(timeoutReset);
+        timeoutReset = setTimeout(() => { clickCount = 0; }, 800);
+        if(clickCount === 3) {
+            const penguin = document.getElementById('penguinFlash');
+            penguin.style.opacity = '1';
+            penguin.style.transition = 'none';
+            setTimeout(() => { penguin.style.opacity = '0'; }, 300);
+            clickCount = 0;
+        }
+    });
+
+    // Бездействие 10 секунд (idle) — появляется сообщение
+    let idleTimer;
+    const idleMsgDiv = document.getElementById('idleMessage');
+    function resetIdleTimer(){
+        if(idleMsgDiv) idleMsgDiv.style.display = 'none';
+        clearTimeout(idleTimer);
+        idleTimer = setTimeout(() => {
+            if(idleMsgDiv && modal.style.display !== 'flex') {
+                idleMsgDiv.style.display = 'flex';
+            }
+        }, 10000);
+    }
+    window.addEventListener('load', resetIdleTimer);
+    window.addEventListener('mousemove', resetIdleTimer);
+    window.addEventListener('click', resetIdleTimer);
+    window.addEventListener('keydown', resetIdleTimer);
+    document.getElementById('idleYesBtn')?.addEventListener('click', () => {
+        idleMsgDiv.style.display = 'none';
+        alert("Свобода — это когда тебе нечего терять. Закрой вкладку, если посмеешь.");
+    });
+
+    // дополнительный визуальный шум: при разрушителе дёргание body
+    // также для "режима химия" small tweak, который уже есть
+    // кадр-флешбек - генератор случайных эффектов
+    console.log("%cПомни: первый закон — не рассказывать.", "color:#ab7b3c");
+</script>
+</body>
+</html>
